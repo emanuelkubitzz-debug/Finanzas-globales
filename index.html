@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mercados Globales</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div>
+    <h1>Mercados Globales</h1>
+    <p>Cripto · Monedas · Mercados</p>
+  </div>
+  <div class="live"><span></span> EN VIVO</div>
+</header>
+
+<main>
+  <section class="topbar">
+    <div>
+      <strong>Panel de mercados</strong>
+      <small id="updated">Esperando datos...</small>
+    </div>
+    <button id="refresh">Actualizar</button>
+  </section>
+
+  <section>
+    <div class="section-title"><h2>Criptomonedas</h2><span>USD</span></div>
+    <div class="cards">
+      <article class="card"><div class="coin-head"><b>₿</b><span>Bitcoin</span></div><strong id="btcPrice">—</strong><small id="btcChange">—</small></article>
+      <article class="card"><div class="coin-head"><b>Ξ</b><span>Ethereum</span></div><strong id="ethPrice">—</strong><small id="ethChange">—</small></article>
+      <article class="card"><div class="coin-head"><b>S</b><span>Solana</span></div><strong id="solPrice">—</strong><small id="solChange">—</small></article>
+    </div>
+  </section>
+
+  <section class="converter">
+    <div class="section-title"><h2>Conversor de monedas</h2><span>Tipo de cambio</span></div>
+    <div class="form">
+      <div><label>Cantidad</label><input id="amount" type="number" value="100" min="0" step="any"></div>
+      <div><label>Desde</label><select id="from"><option>USD</option><option>ARS</option><option>EUR</option><option>BRL</option><option>GBP</option><option>JPY</option></select></div>
+      <div class="arrow">→</div>
+      <div><label>Hacia</label><select id="to"><option>ARS</option><option>USD</option><option>EUR</option><option>BRL</option><option>GBP</option><option>JPY</option></select></div>
+    </div>
+    <div class="result">
+      <small>Resultado</small>
+      <strong id="result">—</strong>
+      <p id="rate">Tipo de cambio: —</p>
+    </div>
+  </section>
+
+  <p class="notice">Los datos son informativos. Las cotizaciones dependen de las APIs utilizadas y pueden tener retrasos.</p>
+</main>
+
+<footer>Mercados Globales · Proyecto para GitHub Pages</footer>
+<script src="script.js"></script>
+</body>
+</html>
