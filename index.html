@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finanzas Globales - Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
+  <header class="navbar">
+    <div class="logo">
+      <span class="logo-icon">🌐</span>
+      <h1>Finanzas Globales</h1>
+    </div>
+    <nav class="nav-links">
+      <a href="#" class="active">Inicio</a>
+      <a href="#">Conversión</a>
+      <a href="#">Mercados</a>
+      <a href="#">Historial</a>
+      <a href="#">Análisis</a>
+      <a href="#">Transacciones</a>
+      <a href="#">Configuración</a>
+    </nav>
+    <div class="user-actions">
+      <button class="btn-primary">+ Nueva Transacción</button>
+      <div class="user-avatar">👤</div>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL DEL DASHBOARD -->
+  <div class="dashboard-grid">
+
+    <!-- PANEL LATERAL IZQUIERDO: LISTA DE MONEDAS -->
+    <aside class="sidebar-left card">
+      <h3>Monedas</h3>
+      <ul class="currency-list">
+        <li class="currency-item">
+          <div class="currency-info">
+            <span class="flag">🇺🇸</span>
+            <div>
+              <strong>USD</strong>
+              <small>Dólar Estadounidense</small>
+            </div>
+          </div>
+          <span class="price text-danger">$ 1.00 (-0.2%)</span>
+        </li>
+        <li class="currency-item">
+          <div class="currency-info">
+            <span class="flag">🇪🇺</span>
+            <div>
+              <strong>EUR</strong>
+              <small>Euro</small>
+            </div>
+          </div>
+          <span class="price text-success">$ 0.92 (+0.3%)</span>
+        </li>
+        <li class="currency-item">
+          <div class="currency-info">
+            <span class="flag">🇦🇷</span>
+            <div>
+              <strong>ARS</strong>
+              <small>Peso Argentino</small>
+            </div>
+          </div>
+          <span class="price text-danger">$ 985.50 (-1.1%)</span>
+        </li>
+        <li class="currency-item">
+          <div class="currency-info">
+            <span class="flag">🇧🇷</span>
+            <div>
+              <strong>BRL</strong>
+              <small>Real Brasileño</small>
+            </div>
+          </div>
+          <span class="price text-success">$ 5.45 (+0.5%)</span>
+        </li>
+        <li class="currency-item">
+          <div class="currency-info">
+            <span class="flag">🇲🇽</span>
+            <div>
+              <strong>MXN</strong>
+              <small>Peso Mexicano</small>
+            </div>
+          </div>
+          <span class="price text-danger">$ 19.30 (-0.4%)</span>
+        </li>
+        <li class="currency-item">
+          <div class="currency-info">
+            <span class="flag">🇬🇧</span>
+            <div>
+              <strong>GBP</strong>
+              <small>Libra Esterlina</small>
+            </div>
+          </div>
+          <span class="price text-success">$ 0.79 (+0.1%)</span>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- PANEL CENTRAL: MERCADO Y CONVERSOR -->
+    <main class="main-content">
+      
+      <!-- MERCADO EN TIEMPO REAL -->
+      <section class="card market-chart">
+        <div class="card-header">
+          <h3>Mercado en Tiempo Real (USD/EUR)</h3>
+          <div class="timeframe-selector">
+            <button class="active">1D</button>
+            <button>1W</button>
+            <button>1M</button>
+            <button>1Y</button>
+          </div>
+        </div>
+        <!-- Simulación visual del gráfico -->
+        <div class="chart-placeholder">
+          <div class="chart-line"></div>
+          <span class="chart-label">Cotización en vivo...</span>
+        </div>
+      </section>
+
+      <!-- SECCIÓN DEL CONVERSOR -->
+      <section class="card converter-section">
+        <h3>Conversor de Moneda</h3>
+        <form id="currency-form" class="converter-form">
+          <div class="input-field">
+            <label for="amount">Monto</label>
+            <input type="number" id="amount" placeholder="100.00" value="100" min="0.01" step="0.01" required>
+          </div>
+
+          <div class="select-field">
+            <label for="from">De</label>
+            <select id="from">
+              <option value="USD">🇺🇸 USD</option>
+              <option value="EUR">🇪🇺 EUR</option>
+              <option value="ARS">🇦🇷 ARS</option>
+              <option value="BRL">🇧🇷 BRL</option>
+              <option value="MXN">🇲🇽 MXN</option>
+            </select>
+          </div>
+
+          <button type="button" class="btn-swap" id="swap-btn">⇄</button>
+
+          <div class="select-field">
+            <label for="to">A</label>
+            <select id="to">
+              <option value="EUR">🇪🇺 EUR</option>
+              <option value="USD">🇺🇸 USD</option>
+              <option value="ARS">🇦🇷 ARS</option>
+              <option value="BRL">🇧🇷 BRL</option>
+              <option value="MXN">🇲🇽 MXN</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-primary btn-convert">Convertir</button>
+        </form>
+
+        <div id="result-box" class="result-box">
+          <p>Resultado Estimado:</p>
+          <h2 id="converted-amount">92.00 EUR</h2>
+          <small id="applied-rate">Tasa: 1 USD = 0.9200 EUR</small>
+        </div>
+      </section>
+
+      <!-- TENDENCIA DE CONVERSIÓN -->
+      <section class="card trend-section">
+        <h3>Tendencia de Conversión</h3>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span>Tasa Promedio</span>
+            <strong>0.9185</strong>
+          </div>
+          <div class="metric-card">
+            <span>Máximo Diario</span>
+            <strong>0.9230</strong>
+          </div>
+          <div class="metric-card">
+            <span>Mínimo Diario</span>
+            <strong>0.9140</strong>
+          </div>
+          <div class="metric-card">
+            <span>Volumen 24h</span>
+            <strong>$ 1.4M</strong>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- PANEL LATERAL DERECHO: TASAS Y HISTORIAL -->
+    <aside class="sidebar-right">
+      
+      <!-- TASAS ACTIVAS -->
+      <section class="card">
+        <h3>Tasas de Cambio Activas</h3>
+        <ul class="rate-list">
+          <li>
+            <span>USD a EUR</span>
+            <strong>0.9200</strong>
+          </li>
+          <li>
+            <span>EUR a ARS</span>
+            <strong>1071.20</strong>
+          </li>
+          <li>
+            <span>USD a BRL</span>
+            <strong>5.4500</strong>
+          </li>
+          <li>
+            <span>USD a MXN</span>
+            <strong>19.3000</strong>
+          </li>
+        </ul>
+      </section>
+
+      <!-- HISTORIAL DE CONVERSIONES -->
+      <section class="card">
+        <h3>Historial de Conversiones</h3>
+        <div class="history-list">
+          <div class="history-item">
+            <div>
+              <strong>USD a EUR</strong>
+              <small>Hace 10 min</small>
+            </div>
+            <span class="text-success">$ 100 → € 92.00</span>
+          </div>
+          <div class="history-item">
+            <div>
+              <strong>USD a ARS</strong>
+              <small>Hace 25 min</small>
+            </div>
+            <span class="text-success">$ 50 → $ 49,275</span>
+          </div>
+          <div class="history-item">
+            <div>
+              <strong>EUR a USD</strong>
+              <small>Hace 1 hora</small>
+            </div>
+            <span class="text-success">€ 200 → $ 217.38</span>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
