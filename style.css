@@ -1,284 +1,264 @@
-/* RESET & ESTILOS GLOBALES */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Finance | Global Exchange</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Fondo animado -->
+    <div class="bg-gradient"></div>
+    <div class="bg-grid"></div>
+    
+    <!-- Navbar flotante -->
+    <nav class="glass-nav">
+        <div class="nav-brand">
+            <div class="logo-glow">
+                <i class="fas fa-globe-americas"></i>
+            </div>
+            <div class="brand-text">
+                <span class="brand-title">NEXUS</span>
+                <span class="brand-subtitle">FINANCE</span>
+            </div>
+        </div>
+        
+        <div class="nav-center">
+            <div class="market-ticker">
+                <span class="ticker-item">
+                    <i class="fas fa-dollar-sign"></i> USD/EUR <span class="trend-up">+0.45%</span>
+                </span>
+                <span class="ticker-item">
+                    <i class="fas fa-coins"></i> BTC <span class="trend-down">-1.2%</span>
+                </span>
+                <span class="ticker-item">
+                    <i class="fas fa-chart-line"></i> S&P <span class="trend-up">+0.89%</span>
+                </span>
+            </div>
+        </div>
 
-body {
-  background-color: #0d1117;
-  color: #c9d1d9;
-  min-height: 100vh;
-}
+        <div class="nav-actions">
+            <button class="theme-toggle" id="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="user-menu glass">
+                <img src="https://ui-avatars.com/api/?name=User&background=random" alt="User" class="user-avatar">
+                <span id="user-name">Usuario</span>
+                <i class="fas fa-chevron-down"></i>
+                <div class="dropdown">
+                    <a href="#"><i class="fas fa-user"></i> Perfil</a>
+                    <a href="#"><i class="fas fa-cog"></i> Configuración</a>
+                    <hr>
+                    <a href="#" id="btn-logout" class="logout"><i class="fas fa-sign-out-alt"></i> Salir</a>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-/* COMPONENTES DE REUSO */
-.card {
-  background-color: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 12px;
-  padding: 1.25rem;
-  margin-bottom: 1rem;
-}
+    <!-- Layout Principal -->
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar glass">
+            <div class="balance-card-glass">
+                <span class="balance-label">Balance Global</span>
+                <div class="balance-amount" id="user-balance">$0.00</div>
+                <div class="balance-change positive">
+                    <i class="fas fa-arrow-up"></i> +12.5% este mes
+                </div>
+            </div>
 
-h3 {
-  font-size: 1rem;
-  color: #f0f6fc;
-  margin-bottom: 1rem;
-}
+            <nav class="side-menu">
+                <a href="#" class="menu-item active" data-section="dashboard">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="menu-item" data-section="convert">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Convertir</span>
+                </a>
+                <a href="#" class="menu-item" data-section="wallet">
+                    <i class="fas fa-wallet"></i>
+                    <span>Billetera</span>
+                </a>
+                <a href="#" class="menu-item" data-section="history">
+                    <i class="fas fa-history"></i>
+                    <span>Historial</span>
+                </a>
+                <a href="#" class="menu-item" data-section="analytics">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Análisis</span>
+                </a>
+            </nav>
 
-.text-success { color: #3fb950; }
-.text-danger { color: #f85149; }
+            <div class="quick-actions">
+                <button class="btn-glass btn-primary-glass" id="btn-deposit">
+                    <i class="fas fa-plus"></i> Depositar
+                </button>
+            </div>
+        </aside>
 
-.btn-primary {
-  background-color: #238636;
-  color: #ffffff;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
+        <!-- Contenido Principal -->
+        <main class="main-content">
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card glass">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Conversiones</span>
+                        <span class="stat-value" id="total-conversions">0</span>
+                    </div>
+                    <div class="stat-chart">
+                        <svg viewBox="0 0 100 30" class="chart-line">
+                            <polyline fill="none" stroke="currentColor" stroke-width="2" points="0,25 20,20 40,22 60,15 80,18 100,10"/>
+                        </svg>
+                    </div>
+                </div>
 
-.btn-primary:hover {
-  background-color: #2ea043;
-}
+                <div class="stat-card glass">
+                    <div class="stat-icon gold">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Comisiones Ahorradas</span>
+                        <span class="stat-value">$0.00</span>
+                    </div>
+                </div>
 
-/* NAVBAR */
-.navbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #161b22;
-  border-bottom: 1px solid #30363d;
-  padding: 0.8rem 2rem;
-}
+                <div class="stat-card glass">
+                    <div class="stat-icon purple">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Monedas</span>
+                        <span class="stat-value">6</span>
+                    </div>
+                </div>
+            </div>
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
+            <!-- Conversor Principal -->
+            <section class="converter-section glass-panel" id="converter">
+                <div class="section-header-glass">
+                    <h2><i class="fas fa-exchange-alt"></i> Conversor Global</h2>
+                    <p>Tasas en tiempo real • Comisión 5%</p>
+                </div>
 
-.logo h1 {
-  font-size: 1.1rem;
-  color: #f0f6fc;
-}
+                <div class="converter-widget">
+                    <div class="currency-box from">
+                        <label>Tienes</label>
+                        <div class="input-group">
+                            <input type="number" id="amount" placeholder="0.00" step="0.01">
+                            <select id="from">
+                                <option value="USD" selected>🇺🇸 USD</option>
+                                <option value="EUR">🇪🇺 EUR</option>
+                                <option value="GBP">🇬🇧 GBP</option>
+                                <option value="MXN">🇲🇽 MXN</option>
+                                <option value="ARS">🇦🇷 ARS</option>
+                                <option value="COP">🇨🇴 COP</option>
+                            </select>
+                        </div>
+                        <span class="currency-name">Dólar Americano</span>
+                    </div>
 
-.nav-links {
-  display: flex;
-  gap: 1.5rem;
-}
+                    <button class="swap-btn" id="swap-currencies">
+                        <i class="fas fa-exchange-alt"></i>
+                    </button>
 
-.nav-links a {
-  color: #8b949e;
-  text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.2s;
-}
+                    <div class="currency-box to">
+                        <label>Recibes</label>
+                        <div class="input-group">
+                            <input type="text" id="result-amount" placeholder="0.00" readonly>
+                            <select id="to">
+                                <option value="USD">🇺🇸 USD</option>
+                                <option value="EUR" selected>🇪🇺 EUR</option>
+                                <option value="GBP">🇬🇧 GBP</option>
+                                <option value="MXN">🇲🇽 MXN</option>
+                                <option value="ARS">🇦🇷 ARS</option>
+                                <option value="COP">🇨🇴 COP</option>
+                            </select>
+                        </div>
+                        <span class="currency-name">Euro</span>
+                    </div>
+                </div>
 
-.nav-links a.active, .nav-links a:hover {
-  color: #58a6ff;
-}
+                <div class="rate-info">
+                    <div class="rate-display">
+                        <i class="fas fa-chart-line"></i>
+                        <span id="applied-rate">1 USD = 0.85 EUR</span>
+                    </div>
+                    <div class="fee-display">
+                        <span>Comisión: <strong id="commission">0.00</strong></span>
+                    </div>
+                </div>
 
-.user-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
+                <button class="btn-convert" id="btn-convert">
+                    <span>Convertir Ahora</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </section>
 
-.user-avatar {
-  background: #30363d;
-  padding: 0.5rem;
-  border-radius: 50%;
-  cursor: pointer;
-}
+            <!-- Métodos de Pago -->
+            <section class="payments-section" id="payments">
+                <h3 class="section-title"><i class="fas fa-credit-card"></i> Métodos de Recarga</h3>
+                
+                <div class="payment-cards">
+                    <div class="payment-card-large glass" data-provider="stripe">
+                        <div class="card-bg stripe-gradient"></div>
+                        <div class="card-content">
+                            <i class="fab fa-cc-stripe card-logo"></i>
+                            <h4>Stripe</h4>
+                            <p>Tarjetas de crédito/débito</p>
+                            <button class="btn-card-action">Recargar <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
 
-/* GRID PRINCIPAL */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 280px 1fr 300px;
-  gap: 1rem;
-  padding: 1.5rem;
-  max-width: 1600px;
-  margin: 0 auto;
-}
+                    <div class="payment-card-large glass" data-provider="paypal">
+                        <div class="card-bg paypal-gradient"></div>
+                        <div class="card-content">
+                            <i class="fab fa-paypal card-logo"></i>
+                            <h4>PayPal</h4>
+                            <p>Cuenta PayPal segura</p>
+                            <button class="btn-card-action">Recargar <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-/* LATERAL IZQUIERDO: MONEDAS */
-.currency-list {
-  list-style: none;
-}
+            <!-- Historial -->
+            <section class="history-section glass-panel" id="history">
+                <div class="section-header-glass">
+                    <h2><i class="fas fa-history"></i> Actividad Reciente</h2>
+                    <button class="btn-text">Ver todo <i class="fas fa-arrow-right"></i></button>
+                </div>
 
-.currency-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #21262d;
-}
+                <div class="transactions-list" id="transactions-list">
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No hay transacciones recientes</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
 
-.currency-info {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
+    <!-- Modal de Depósito -->
+    <div class="modal" id="deposit-modal">
+        <div class="modal-content glass">
+            <button class="modal-close"><i class="fas fa-times"></i></button>
+            <h3>Recargar Saldo</h3>
+            <div class="amount-presets">
+                <button class="preset-btn" data-amount="50">$50</button>
+                <button class="preset-btn" data-amount="100">$100</button>
+                <button class="preset-btn" data-amount="500">$500</button>
+            </div>
+            <input type="number" id="custom-amount" placeholder="Otro monto">
+            <button class="btn-primary-glass btn-full" id="confirm-deposit">Continuar</button>
+        </div>
+    </div>
 
-.currency-info strong {
-  display: block;
-  font-size: 0.85rem;
-  color: #f0f6fc;
-}
-
-.currency-info small {
-  font-size: 0.75rem;
-  color: #8b949e;
-}
-
-.price {
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-/* CONTENIDO CENTRAL */
-.market-chart .card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.timeframe-selector button {
-  background: #21262d;
-  border: 1px solid #30363d;
-  color: #8b949e;
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.timeframe-selector button.active {
-  background: #1f6beb;
-  color: #fff;
-}
-
-.chart-placeholder {
-  height: 200px;
-  background: linear-gradient(180deg, rgba(31,107,235,0.1) 0%, rgba(13,17,23,0) 100%);
-  border: 1px dashed #30363d;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #8b949e;
-  margin-top: 1rem;
-}
-
-/* FORMULARIO CONVERSOR */
-.converter-form {
-  display: flex;
-  align-items: flex-end;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.input-field, .select-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  flex: 1;
-}
-
-label {
-  font-size: 0.8rem;
-  color: #8b949e;
-}
-
-input, select {
-  background-color: #0d1117;
-  border: 1px solid #30363d;
-  color: #f0f6fc;
-  padding: 0.6rem;
-  border-radius: 6px;
-  outline: none;
-  font-size: 0.9rem;
-}
-
-input:focus, select:focus {
-  border-color: #58a6ff;
-}
-
-.btn-swap {
-  background: #21262d;
-  border: 1px solid #30363d;
-  color: #c9d1d9;
-  padding: 0.6rem 0.8rem;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.btn-convert {
-  height: 38px;
-}
-
-.result-box {
-  margin-top: 1.2rem;
-  padding: 1rem;
-  background-color: #0d1117;
-  border-radius: 8px;
-  border-left: 4px solid #238636;
-}
-
-.result-box h2 {
-  color: #3fb950;
-  margin: 0.2rem 0;
-}
-
-/* METRICAS Y TENDENCIAS */
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.8rem;
-}
-
-.metric-card {
-  background: #0d1117;
-  padding: 0.8rem;
-  border-radius: 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.metric-card span {
-  font-size: 0.75rem;
-  color: #8b949e;
-}
-
-/* LATERAL DERECHO */
-.rate-list, .history-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-}
-
-.rate-list li, .history-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.85rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #21262d;
-}
-
-.history-item small {
-  display: block;
-  color: #8b949e;
-}
-
-/* RESPONSIVO */
-@media (max-width: 1200px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
-}
+    <script src="app.js"></script>
+</body>
+</html>
