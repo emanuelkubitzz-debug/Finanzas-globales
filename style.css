@@ -1,264 +1,722 @@
-<!DOCTYPE html>
-<html lang="es" data-theme="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Finance | Global Exchange</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <!-- Fondo animado -->
-    <div class="bg-gradient"></div>
-    <div class="bg-grid"></div>
+:root {
+    --bg-primary: #0a0e27;
+    --bg-secondary: rgba(255, 255, 255, 0.03);
+    --bg-glass: rgba(255, 255, 255, 0.05);
+    --border-glass: rgba(255, 255, 255, 0.1);
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+    --accent-blue: #3b82f6;
+    --accent-gold: #f59e0b;
+    --accent-purple: #8b5cf6;
+    --accent-green: #10b981;
+    --accent-red: #ef4444;
+    --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+[data-theme="light"] {
+    --bg-primary: #f1f5f9;
+    --bg-secondary: rgba(255, 255, 255, 0.8);
+    --bg-glass: rgba(255, 255, 255, 0.7);
+    --border-glass: rgba(0, 0, 0, 0.1);
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Fondos animados */
+.bg-gradient {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 40%);
+    animation: rotate 30s linear infinite;
+    z-index: -2;
+}
+
+.bg-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: -1;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Glass Effect */
+.glass {
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-glass);
+    border-radius: 16px;
+}
+
+.glass-panel {
+    background: var(--bg-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass);
+    border-radius: 24px;
+    padding: 2rem;
+}
+
+/* Navbar */
+.glass-nav {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 2rem);
+    max-width: 1400px;
+    height: 70px;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    z-index: 1000;
+    box-shadow: var(--shadow-glass);
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.logo-glow {
+    width: 40px;
+    height: 40px;
+    background: var(--gradient-1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
+    50% { box-shadow: 0 0 40px rgba(102, 126, 234, 0.8); }
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+}
+
+.brand-subtitle {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    letter-spacing: 2px;
+}
+
+.market-ticker {
+    display: flex;
+    gap: 2rem;
+    font-size: 0.85rem;
+}
+
+.ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.trend-up { color: var(--accent-green); }
+.trend-down { color: var(--accent-red); }
+
+/* Layout */
+.app-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+    padding: 100px 2rem 2rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* Sidebar */
+.sidebar {
+    position: sticky;
+    top: 100px;
+    height: calc(100vh - 120px);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.balance-card-glass {
+    background: var(--gradient-1);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.balance-card-glass::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.balance-label {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.balance-amount {
+    font-size: 2rem;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.balance-change {
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.balance-change.positive { color: #86efac; }
+
+.side-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.menu-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: var(--accent-blue);
+    border-radius: 0 4px 4px 0;
+    transition: height 0.3s;
+}
+
+.menu-item:hover,
+.menu-item.active {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--text-primary);
+}
+
+.menu-item.active::before {
+    height: 60%;
+}
+
+.menu-item i {
+    width: 24px;
+    text-align: center;
+}
+
+/* Main Content */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.stat-card {
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.stat-icon.blue { background: rgba(59, 130, 246, 0.2); color: var(--accent-blue); }
+.stat-icon.gold { background: rgba(245, 158, 11, 0.2); color: var(--accent-gold); }
+.stat-icon.purple { background: rgba(139, 92, 246, 0.2); color: var(--accent-purple); }
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.stat-chart {
+    width: 80px;
+    height: 40px;
+    color: var(--accent-green);
+    opacity: 0.5;
+}
+
+/* Converter Section */
+.converter-section {
+    position: relative;
+}
+
+.section-header-glass {
+    margin-bottom: 2rem;
+}
+
+.section-header-glass h2 {
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.section-header-glass p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.converter-widget {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.currency-box {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-glass);
+}
+
+.currency-box label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.input-group {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.input-group input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 2rem;
+    font-weight: 600;
+    font-family: inherit;
+    outline: none;
+    width: 100%;
+}
+
+.input-group input::placeholder {
+    color: var(--text-secondary);
+}
+
+.input-group select {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-glass);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.currency-name {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.swap-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--gradient-1);
+    border: none;
+    color: white;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: transform 0.3s;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+}
+
+.swap-btn:hover {
+    transform: rotate(180deg);
+}
+
+.rate-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.rate-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--accent-green);
+}
+
+.btn-convert {
+    width: 100%;
+    padding: 1.25rem;
+    background: var(--gradient-1);
+    border: none;
+    border-radius: 16px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-convert:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+/* Payment Cards */
+.payments-section {
+    margin-top: 1rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.payment-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.payment-card-large {
+    position: relative;
+    height: 200px;
+    border-radius: 24px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.payment-card-large:hover {
+    transform: translateY(-5px);
+}
+
+.card-bg {
+    position: absolute;
+    inset: 0;
+    opacity: 0.8;
+}
+
+.stripe-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.paypal-gradient {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.card-content {
+    position: relative;
+    z-index: 1;
+    padding: 1.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    color: white;
+}
+
+.card-logo {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.card-content h4 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.card-content p {
+    opacity: 0.9;
+    margin-bottom: auto;
+}
+
+.btn-card-action {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+    transition: background 0.3s;
+}
+
+.btn-card-action:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* History Section */
+.history-section {
+    margin-top: 1rem;
+}
+
+.transactions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.transaction-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    border: 1px solid var(--border-glass);
+}
+
+.tx-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.tx-icon.conversion { background: rgba(59, 130, 246, 0.2); color: var(--accent-blue); }
+.tx-icon.deposit { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+
+.tx-details {
+    flex: 1;
+}
+
+.tx-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.tx-date {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.tx-amount {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.tx-amount.positive { color: var(--accent-green); }
+.tx-amount.negative { color: var(--accent-red); }
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    width: 90%;
+    max-width: 400px;
+    padding: 2rem;
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.25rem;
+    cursor: pointer;
+}
+
+.amount-presets {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+}
+
+.preset-btn {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-glass);
+    border-radius: 12px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.preset-btn:hover,
+.preset-btn.active {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .app-layout {
+        grid-template-columns: 1fr;
+    }
     
-    <!-- Navbar flotante -->
-    <nav class="glass-nav">
-        <div class="nav-brand">
-            <div class="logo-glow">
-                <i class="fas fa-globe-americas"></i>
-            </div>
-            <div class="brand-text">
-                <span class="brand-title">NEXUS</span>
-                <span class="brand-subtitle">FINANCE</span>
-            </div>
-        </div>
-        
-        <div class="nav-center">
-            <div class="market-ticker">
-                <span class="ticker-item">
-                    <i class="fas fa-dollar-sign"></i> USD/EUR <span class="trend-up">+0.45%</span>
-                </span>
-                <span class="ticker-item">
-                    <i class="fas fa-coins"></i> BTC <span class="trend-down">-1.2%</span>
-                </span>
-                <span class="ticker-item">
-                    <i class="fas fa-chart-line"></i> S&P <span class="trend-up">+0.89%</span>
-                </span>
-            </div>
-        </div>
+    .sidebar {
+        display: none;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .converter-widget {
+        flex-direction: column;
+    }
+    
+    .payment-cards {
+        grid-template-columns: 1fr;
+    }
+}
 
-        <div class="nav-actions">
-            <button class="theme-toggle" id="theme-toggle">
-                <i class="fas fa-moon"></i>
-            </button>
-            <div class="user-menu glass">
-                <img src="https://ui-avatars.com/api/?name=User&background=random" alt="User" class="user-avatar">
-                <span id="user-name">Usuario</span>
-                <i class="fas fa-chevron-down"></i>
-                <div class="dropdown">
-                    <a href="#"><i class="fas fa-user"></i> Perfil</a>
-                    <a href="#"><i class="fas fa-cog"></i> Configuración</a>
-                    <hr>
-                    <a href="#" id="btn-logout" class="logout"><i class="fas fa-sign-out-alt"></i> Salir</a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Layout Principal -->
-    <div class="app-layout">
-        <!-- Sidebar -->
-        <aside class="sidebar glass">
-            <div class="balance-card-glass">
-                <span class="balance-label">Balance Global</span>
-                <div class="balance-amount" id="user-balance">$0.00</div>
-                <div class="balance-change positive">
-                    <i class="fas fa-arrow-up"></i> +12.5% este mes
-                </div>
-            </div>
-
-            <nav class="side-menu">
-                <a href="#" class="menu-item active" data-section="dashboard">
-                    <i class="fas fa-th-large"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="#" class="menu-item" data-section="convert">
-                    <i class="fas fa-exchange-alt"></i>
-                    <span>Convertir</span>
-                </a>
-                <a href="#" class="menu-item" data-section="wallet">
-                    <i class="fas fa-wallet"></i>
-                    <span>Billetera</span>
-                </a>
-                <a href="#" class="menu-item" data-section="history">
-                    <i class="fas fa-history"></i>
-                    <span>Historial</span>
-                </a>
-                <a href="#" class="menu-item" data-section="analytics">
-                    <i class="fas fa-chart-pie"></i>
-                    <span>Análisis</span>
-                </a>
-            </nav>
-
-            <div class="quick-actions">
-                <button class="btn-glass btn-primary-glass" id="btn-deposit">
-                    <i class="fas fa-plus"></i> Depositar
-                </button>
-            </div>
-        </aside>
-
-        <!-- Contenido Principal -->
-        <main class="main-content">
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-card glass">
-                    <div class="stat-icon blue">
-                        <i class="fas fa-exchange-alt"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-label">Conversiones</span>
-                        <span class="stat-value" id="total-conversions">0</span>
-                    </div>
-                    <div class="stat-chart">
-                        <svg viewBox="0 0 100 30" class="chart-line">
-                            <polyline fill="none" stroke="currentColor" stroke-width="2" points="0,25 20,20 40,22 60,15 80,18 100,10"/>
-                        </svg>
-                    </div>
-                </div>
-
-                <div class="stat-card glass">
-                    <div class="stat-icon gold">
-                        <i class="fas fa-coins"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-label">Comisiones Ahorradas</span>
-                        <span class="stat-value">$0.00</span>
-                    </div>
-                </div>
-
-                <div class="stat-card glass">
-                    <div class="stat-icon purple">
-                        <i class="fas fa-globe"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-label">Monedas</span>
-                        <span class="stat-value">6</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Conversor Principal -->
-            <section class="converter-section glass-panel" id="converter">
-                <div class="section-header-glass">
-                    <h2><i class="fas fa-exchange-alt"></i> Conversor Global</h2>
-                    <p>Tasas en tiempo real • Comisión 5%</p>
-                </div>
-
-                <div class="converter-widget">
-                    <div class="currency-box from">
-                        <label>Tienes</label>
-                        <div class="input-group">
-                            <input type="number" id="amount" placeholder="0.00" step="0.01">
-                            <select id="from">
-                                <option value="USD" selected>🇺🇸 USD</option>
-                                <option value="EUR">🇪🇺 EUR</option>
-                                <option value="GBP">🇬🇧 GBP</option>
-                                <option value="MXN">🇲🇽 MXN</option>
-                                <option value="ARS">🇦🇷 ARS</option>
-                                <option value="COP">🇨🇴 COP</option>
-                            </select>
-                        </div>
-                        <span class="currency-name">Dólar Americano</span>
-                    </div>
-
-                    <button class="swap-btn" id="swap-currencies">
-                        <i class="fas fa-exchange-alt"></i>
-                    </button>
-
-                    <div class="currency-box to">
-                        <label>Recibes</label>
-                        <div class="input-group">
-                            <input type="text" id="result-amount" placeholder="0.00" readonly>
-                            <select id="to">
-                                <option value="USD">🇺🇸 USD</option>
-                                <option value="EUR" selected>🇪🇺 EUR</option>
-                                <option value="GBP">🇬🇧 GBP</option>
-                                <option value="MXN">🇲🇽 MXN</option>
-                                <option value="ARS">🇦🇷 ARS</option>
-                                <option value="COP">🇨🇴 COP</option>
-                            </select>
-                        </div>
-                        <span class="currency-name">Euro</span>
-                    </div>
-                </div>
-
-                <div class="rate-info">
-                    <div class="rate-display">
-                        <i class="fas fa-chart-line"></i>
-                        <span id="applied-rate">1 USD = 0.85 EUR</span>
-                    </div>
-                    <div class="fee-display">
-                        <span>Comisión: <strong id="commission">0.00</strong></span>
-                    </div>
-                </div>
-
-                <button class="btn-convert" id="btn-convert">
-                    <span>Convertir Ahora</span>
-                    <i class="fas fa-arrow-right"></i>
-                </button>
-            </section>
-
-            <!-- Métodos de Pago -->
-            <section class="payments-section" id="payments">
-                <h3 class="section-title"><i class="fas fa-credit-card"></i> Métodos de Recarga</h3>
-                
-                <div class="payment-cards">
-                    <div class="payment-card-large glass" data-provider="stripe">
-                        <div class="card-bg stripe-gradient"></div>
-                        <div class="card-content">
-                            <i class="fab fa-cc-stripe card-logo"></i>
-                            <h4>Stripe</h4>
-                            <p>Tarjetas de crédito/débito</p>
-                            <button class="btn-card-action">Recargar <i class="fas fa-arrow-right"></i></button>
-                        </div>
-                    </div>
-
-                    <div class="payment-card-large glass" data-provider="paypal">
-                        <div class="card-bg paypal-gradient"></div>
-                        <div class="card-content">
-                            <i class="fab fa-paypal card-logo"></i>
-                            <h4>PayPal</h4>
-                            <p>Cuenta PayPal segura</p>
-                            <button class="btn-card-action">Recargar <i class="fas fa-arrow-right"></i></button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Historial -->
-            <section class="history-section glass-panel" id="history">
-                <div class="section-header-glass">
-                    <h2><i class="fas fa-history"></i> Actividad Reciente</h2>
-                    <button class="btn-text">Ver todo <i class="fas fa-arrow-right"></i></button>
-                </div>
-
-                <div class="transactions-list" id="transactions-list">
-                    <div class="empty-state">
-                        <i class="fas fa-inbox"></i>
-                        <p>No hay transacciones recientes</p>
-                    </div>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <!-- Modal de Depósito -->
-    <div class="modal" id="deposit-modal">
-        <div class="modal-content glass">
-            <button class="modal-close"><i class="fas fa-times"></i></button>
-            <h3>Recargar Saldo</h3>
-            <div class="amount-presets">
-                <button class="preset-btn" data-amount="50">$50</button>
-                <button class="preset-btn" data-amount="100">$100</button>
-                <button class="preset-btn" data-amount="500">$500</button>
-            </div>
-            <input type="number" id="custom-amount" placeholder="Otro monto">
-            <button class="btn-primary-glass btn-full" id="confirm-deposit">Continuar</button>
-        </div>
-    </div>
-
-    <script src="app.js"></script>
-</body>
-</html>
+/* Utilidades */
+.hidden { display: none !important; }
+.btn-full { width: 100%; }
