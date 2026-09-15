@@ -98,6 +98,20 @@ db.serialize(() => {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+  db.run(`
+  CREATE TABLE IF NOT EXISTS transactions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    type TEXT NOT NULL, -- 'TOPUP_STRIPE', 'TOPUP_PAYPAL', 'EXCHANGE'
+    amount REAL NOT NULL,
+    currency TEXT NOT NULL DEFAULT 'USD',
+    commission REAL NOT NULL,
+    net_amount REAL NOT NULL,
+    status TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  )
+`);
 });
 
 // -----------------------------------------------------------------------------
@@ -319,6 +333,27 @@ app.post('/api/checkout/stripe', authenticateToken, async (req, res) => {
         console.error('Error al crear sesión de Stripe:', error);
         res.status(500).json({ error: 'Error al procesar el pago con Stripe.' });
     }
+});
+// ==========================================
+// RUTA PARA OBTENER EL HISTORIAL DE TRANSACCIONES
+// ==========================================
+app.get('/api/transactions', authenticateToken, (req, res) => {
+    const userId = req.user.id;
+
+    db.all(
+        `SELECT type, amount, currency, commission, net_amount, status, created_at 
+         FROM transactions 
+         WHERE user_id = ? 
+         ORDER BY created_at DESC LIMIT 10`,
+        [userId],
+        (err, rows) => {
+            if (err) {
+                console.error('Error al obtener transacciones:', err);
+                return res.status(500).json({ error: 'Error al obtener el historial.' });
+            }
+            res.json(rows);
+        }
+    );
 });
 // -----------------------------------------------------------------------------
 // 7. ARRANQUE DEL SERVIDOR
