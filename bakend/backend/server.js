@@ -262,7 +262,63 @@ app.post('/api/checkout/capture-order', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Error al procesar la captura del pago.' });
   }
 });
+// Importar y configurar Stripe (requiere tu clave secreta en el archivo .env)
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'tu_stripe_secret_key');
 
+// ==========================================
+// RUTA DE STRIPE (Tarjetas de Crédito / Débito)
+// ==========================================
+app.post('/api/checkout/stripe', authenticateToken, async (req, res) => {
+    try {
+        const { montoTotal, titulo } = req.body;
+        
+        if (!montoTotal || montoTotal <= 0) {
+            return res.status(400).json({ error: 'Monto inválido.' });
+        }
+
+        // 1. Calcular tu comisión del 5%
+        const comisionPlataforma = montoTotal * 0.05; // Lo que ganas tú
+        const montoNetoUsuario = montoTotal - comisionPlataforma; // Lo que ingresa a su saldo
+
+        // 2. Crear una sesión de pago en Stripe Checkout
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'usd', // Puedes cambiarlo a 'eur', 'ars', etc.
+                        product_data: {
+                            name: titulo || 'Recarga de Saldo - Nexus Finance',
+                            description: 'Recarga de saldo en billetera (Incluye comisión de plataforma)'
+                        },
+                        unit_amount: Math.round(montoTotal * 100), // Stripe requiere el monto en centavos (ej: $50 = 5000)
+                    },
+                    quantity: 1,
+                },
+            ],
+            mode: 'payment',
+            success_url: `${FRONTEND_URL}/pago-exitoso.html?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${FRONTEND_URL}/pago-fallido.html`,
+            client_reference_id: String(req.user.id), // Vinculamos el ID de usuario
+            metadata: {
+                userId: String(req.user.id),
+                comision: comisionPlataforma.toFixed(2),
+                netoAsignar: montoNetoUsuario.toFixed(2)
+            }
+        });
+
+        // 3. Devolver la URL de redirección al frontend
+        res.json({ 
+            url: session.url,
+            comision: comisionPlataforma,
+            netoAsignar: montoNetoUsuario
+        });
+
+    } catch (error) {
+        console.error('Error al crear sesión de Stripe:', error);
+        res.status(500).json({ error: 'Error al procesar el pago con Stripe.' });
+    }
+});
 // -----------------------------------------------------------------------------
 // 7. ARRANQUE DEL SERVIDOR
 // -----------------------------------------------------------------------------
