@@ -563,3 +563,15 @@ app.listen(PORT, () => {
     console.log(`📁 Base de datos: ${dbPath}`);
     console.log(`🌐 Frontend permitido: ${FRONTEND_URL}`);
 });
+   res.json(rows);
+    });
+});
+
+// -----------------------------------------------------------------------------
+// 9. INICIALIZACIÓN DEL SERVIDOR
+// -----------------------------------------------------------------------------
+app.listen(PORT, () => {
+    console.log(`Servidor backend de Nexus Finance corriendo en el puerto ${PORT}`);
+    console.log(`Ambiente configurado para conectar con el frontend en: ${FRONTEND_URL}`);
+});
+
