@@ -1,354 +1,160 @@
+const express = require('express');
+const cors = require('cors');
+
+const app = express();
+
+// Middlewares
+app.use(express.json());
+app.use(cors());
+
+const PORT = process.env.PORT || 3000;
+
 // ==========================================
-// SCRIPT PRINCIPAL - NEXUS FINANCE (FRONTEND)
+middleware para simular verificación de Token
 // ==========================================
+function verificarTokenMiddleware(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
 
-const API_BASE_URL = 'http://localhost:3000/api';
-
-// Función auxiliar para obtener el token JWT guardado
-function obtenerToken() {
-    return localStorage.getItem('token');
-}
-
-// Función auxiliar para guardar token
-function guardarToken(token) {
-    localStorage.setItem('token', token);
-}
-
-// Función auxiliar para cerrar sesión
-function cerrarSesion() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/login.html';
-}
-
-// Formatear moneda
-function formatearMoneda(monto, moneda) {
-    return new Intl.NumberFormat('es-ES', {
-        style: 'currency',
-        currency: moneda
-    }).format(monto);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
+    // Para desarrollo, permitimos pasar si hay token, o puedes bloquear estrictamente:
+    if (!token) {
+        // Si prefieres estricto: return res.status(401).json({ error: 'Token no proporcionado o inválido' });
+    }
     
-    // 1. LÓGICA DEL CONVERSOR DE MONEDAS
-    const form = document.getElementById('currency-form');
-    const amountInput = document.getElementById('amount');
-    const fromSelect = document.getElementById('from');
-    const toSelect = document.getElementById('to');
-    const resultBox = document.getElementById('result-box');
-    const convertedAmountEl = document.getElementById('converted-amount');
-    const appliedRateEl = document.getElementById('applied-rate');
-    const swapBtn = document.getElementById('swap-currencies'); // Botón opcional para invertir
+    // Simulamos un usuario autenticado predeterminado
+    req.user = { id: 'user_123', nombre: 'Emanuel Jesús Kubitz' };
+    next();
+}
 
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+// ==========================================
+// 1. ENDPOINT DE CONVERSIÓN DE DIVISAS
+// ==========================================
+// Coincide con: `${API_BASE_URL}/convert?from=${from}&to=${to}&amount=${amount}`
+app.get('/api/convert', (req, res) => {
+    try {
+        const { from, to, amount } = req.query;
+        const parsedAmount = parseFloat(amount);
 
-            const amount = amountInput.value;
-            const from = fromSelect.value;
-            const to = toSelect.value;
+        if (!parsedAmount || parsedAmount <= 0) {
+            return res.status(400).json({ error: 'Ingresa un monto válido para la conversión.' });
+        }
 
-            if (from === to) {
-                alert('La moneda de origen y destino deben ser distintas.');
-                return;
-            }
+        // Tasa de cambio simulada (ej: 1 USD = 0.85 EUR)
+        const rate = 0.85; 
+        const feePercentage = 0.05; // 5% de comisión
 
-            // Mostrar estado de carga
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Convirtiendo...';
+        const commission = parsedAmount * feePercentage;
+        const netAmountAfterFee = parsedAmount - commission;
+        const netResult = netAmountAfterFee * rate;
 
-            try {
-                // Petición al backend con query params (CORREGIDO)
-                const response = await fetch(`${API_BASE_URL}/convert?from=${from}&to=${to}&amount=${amount}`);
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Error al realizar la conversión');
-                }
-
-                // Renderizar resultado en pantalla (CORREGIDO)
-                convertedAmountEl.textContent = `${data.netResult} ${data.to} (Comisión 5%: ${data.commission} ${data.to})`;
-                appliedRateEl.textContent = `1 ${data.from} = ${data.rate} ${data.to}`;
-                resultBox.classList.remove('hidden');
-                resultBox.classList.add('visible');
-
-            } catch (error) {
-                console.error('Error:', error);
-                alert(error.message);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-            }
+        // Retornamos las propiedades exactas que tu frontend espera leer
+        res.json({
+            from: from,
+            to: to,
+            rate: rate,
+            commission: commission.toFixed(2),
+            netResult: netResult.toFixed(2)
         });
-    }
 
-    // Botón para intercambiar monedas (opcional)
-    if (swapBtn) {
-        swapBtn.addEventListener('click', () => {
-            const temp = fromSelect.value;
-            fromSelect.value = toSelect.value;
-            toSelect.value = temp;
-        });
-    }
-
-    // 2. LÓGICA DE LOS BOTONES DE PAGO (STRIPE Y PAYPAL)
-    
-    // Stripe
-    const btnStripe = document.getElementById('btn-stripe');
-    if (btnStripe) {
-        btnStripe.addEventListener('click', async () => {
-            const monto = prompt('Ingresa el monto a recargar en USD (ej: 50):', '50');
-            if (!monto || isNaN(monto) || monto <= 0) return;
-
-            const token = obtenerToken();
-            if (!token) {
-                alert('Debes iniciar sesión para realizar una recarga.');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/checkout/stripe`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ 
-                        montoTotal: parseFloat(monto), 
-                        titulo: 'Recarga de Saldo - Nexus Finance' 
-                    })
-                });
-
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Error al conectar con Stripe');
-
-                if (data.url) {
-                    window.location.href = data.url; // Redirige al checkout oficial de Stripe
-                }
-            } catch (error) {
-                console.error('Error en Stripe:', error.message);
-                alert(`No se pudo procesar el pago: ${error.message}`);
-            }
-        });
-    }
-
-    // PayPal
-    const btnPaypal = document.getElementById('btn-paypal');
-    if (btnPaypal) {
-        btnPaypal.addEventListener('click', async () => {
-            const monto = prompt('Ingresa el monto a recargar en USD (ej: 50):', '50');
-            if (!monto || isNaN(monto) || monto <= 0) return;
-
-            const token = obtenerToken();
-            if (!token) {
-                alert('Debes iniciar sesión para realizar una recarga.');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/checkout/paypal`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ 
-                        montoTotal: parseFloat(monto),
-                        descripcion: 'Recarga de Saldo - Nexus Finance'
-                    })
-                });
-
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Error al conectar con PayPal');
-
-                if (data.approvalUrl) {
-                    window.location.href = data.approvalUrl; // Redirige a PayPal para aprobación
-                }
-            } catch (error) {
-                console.error('Error en PayPal:', error.message);
-                alert(`No se pudo procesar el pago: ${error.message}`);
-            }
-        });
-    }
-
-    // 3. CARGAR HISTORIAL Y DATOS AL INICIAR EL DASHBOARD
-    const tablaHistorial = document.getElementById('transactions-table-body');
-    if (tablaHistorial) {
-        cargarHistorialTransacciones();
-    }
-
-    // 4. CARGAR DATOS DEL USUARIO (si existe el contenedor)
-    const userInfoContainer = document.getElementById('user-info');
-    if (userInfoContainer) {
-        cargarDatosUsuario();
-    }
-
-    // 5. BOTÓN DE CERRAR SESIÓN
-    const logoutBtn = document.getElementById('btn-logout');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', cerrarSesion);
+    } catch (err) {
+        res.status(500).json({ error: 'Error interno en el servidor al convertir.' });
     }
 });
 
-// Función para obtener el historial de transacciones del usuario (COMPLETA)
-async function cargarHistorialTransacciones() {
-    const token = obtenerToken();
-    if (!token) {
-        console.warn('No hay token disponible para cargar historial');
-        return;
-    }
-
-    const tbody = document.getElementById('transactions-table-body');
-    const loadingRow = document.getElementById('loading-row');
-    
-    // Mostrar estado de carga si existe
-    if (loadingRow) loadingRow.style.display = 'table-row';
-
+// ==========================================
+// 2. ENDPOINT DE PERFIL DE USUARIO
+// ==========================================
+app.get('/api/user/profile', verificarTokenMiddleware, (req, res) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/transactions`, {
-            method: 'GET',
-            headers: { 
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+        res.json({
+            nombre: req.user.nombre,
+            balance: 1540.50, // Balance simulado en USD
+            email: 'emanuel@nexusfinance.com'
         });
-
-        const data = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(data.error || 'Error al cargar historial');
-        }
-
-        const transactions = Array.isArray(data) ? data : data.transactions || [];
-
-        tbody.innerHTML = '';
-
-        if (transactions.length === 0) {
-            // Estado vacío
-            tbody.innerHTML = `
-                <tr class="empty-state">
-                    <td colspan="5" style="text-align: center; padding: 2rem; color: #666;">
-                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">📭</div>
-                        <div>No hay transacciones registradas</div>
-                        <div style="font-size: 0.9rem; margin-top: 0.5rem; color: #999;">
-                            Realiza tu primera conversión para verla aquí
-                        </div>
-                    </td>
-                </tr>
-            `;
-        } else {
-            // Renderizar transacciones
-            transactions.forEach(tx => {
-                const row = document.createElement('tr');
-                
-                // Determinar clase según tipo
-                const typeClass = tx.tipo === 'recarga' ? 'type-deposit' : 
-                                 tx.tipo === 'retiro' ? 'type-withdrawal' : 'type-conversion';
-                
-                // Formatear fecha
-                const fecha = new Date(tx.fecha).toLocaleDateString('es-ES', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-
-                row.innerHTML = `
-                    <td class="tx-id">#${tx.id || tx._id?.slice(-6) || 'N/A'}</td>
-                    <td class="tx-date">${fecha}</td>
-                    <td class="tx-type ${typeClass}">
-                        ${tx.tipo ? tx.tipo.charAt(0).toUpperCase() + tx.tipo.slice(1) : 'Conversión'}
-                    </td>
-                    <td class="tx-amount">
-                        ${tx.montoEntrada ? formatearMoneda(tx.montoEntrada, tx.monedaEntrada) : '-'}
-                        ${tx.montoSalida ? `→ ${formatearMoneda(tx.montoSalida, tx.monedaSalida)}` : ''}
-                    </td>
-                    <td class="tx-status">
-                        <span class="status-badge ${tx.estado || 'completada'}">${tx.estado || 'Completada'}</span>
-                    </td>
-                `;
-                
-                tbody.appendChild(row);
-            });
-        }
-
-    } catch (error) {
-        console.error('Error cargando historial:', error);
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="5" style="text-align: center; padding: 2rem; color: #e74c3c;">
-                    Error al cargar el historial: ${error.message}
-                </td>
-            </tr>
-        `;
-    } finally {
-        if (loadingRow) loadingRow.style.display = 'none';
+    } catch (err) {
+        res.status(500).json({ error: 'Error al obtener el perfil del usuario.' });
     }
-}
+});
 
-// Función para cargar datos del usuario (balance, nombre, etc.)
-async function cargarDatosUsuario() {
-    const token = obtenerToken();
-    if (!token) return;
-
+// ==========================================
+// 3. ENDPOINTS DE PAGO / RECARGAS (Stripe & PayPal)
+// ==========================================
+app.post('/api/checkout/stripe', verificarTokenMiddleware, (req, res) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/user/profile`, {
-            method: 'GET',
-            headers: { 
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+        const { montoTotal, titulo } = req.body;
+        
+        if (!montoTotal || montoTotal <= 0) {
+            return res.status(400).json({ error: 'Monto de recarga inválido.' });
+        }
+
+        // Aquí integrarías el SDK oficial de Stripe
+        // Respondemos con la URL simulada que tu frontend redirigirá (`window.location.href = data.url`)
+        res.json({
+            success: true,
+            url: 'https://checkout.stripe.com/pay/mock_success_session'
         });
+    } catch (err) {
+        res.status(500).json({ error: 'Error al procesar la sesión de Stripe.' });
+    }
+});
 
-        const data = await response.json();
+app.post('/api/checkout/paypal', verificarTokenMiddleware, (req, res) => {
+    try {
+        const { montoTotal, descripcion } = req.body;
         
-        if (!response.ok) throw new Error(data.error);
-
-        // Actualizar UI con datos del usuario
-        const balanceEl = document.getElementById('user-balance');
-        const nameEl = document.getElementById('user-name');
-        
-        if (balanceEl && data.balance !== undefined) {
-            balanceEl.textContent = formatearMoneda(data.balance, 'USD');
-        }
-        
-        if (nameEl && data.nombre) {
-            nameEl.textContent = data.nombre;
+        if (!montoTotal || montoTotal <= 0) {
+            return res.status(400).json({ error: 'Monto de recarga inválido.' });
         }
 
-        // Guardar datos en localStorage para uso offline
-        localStorage.setItem('user', JSON.stringify(data));
-
-    } catch (error) {
-        console.error('Error cargando datos de usuario:', error);
+        // Aquí integrarías la API de PayPal
+        // Respondemos con la URL de aprobación que espera tu script
+        res.json({
+            success: true,
+            approvalUrl: 'https://www.sandbox.paypal.com/checkoutnow?token=mock_paypal_token'
+        });
+    } catch (err) {
+        res.status(500).json({ error: 'Error al procesar la orden de PayPal.' });
     }
-}
+});
 
-// Función para verificar autenticación en páginas protegidas
-function verificarAutenticacion() {
-    const token = obtenerToken();
-    const publicPages = ['/login.html', '/register.html', '/index.html', '/'];
-    const currentPage = window.location.pathname;
+// ==========================================
+// 4. ENDPOINT DE HISTORIAL DE TRANSACCIONES
+// ==========================================
+app.get('/api/transactions', verificarTokenMiddleware, (req, res) => {
+    try {
+        // Datos simulados estructurados para que tu bucle en `script.js` los pinte perfectamente en la tabla
+        const transactions = [
+            {
+                id: '109283',
+                fecha: new Date().toISOString(),
+                tipo: 'recarga',
+                montoEntrada: 100.00,
+                monedaEntrada: 'USD',
+                montoSalida: null,
+                monedaSalida: null,
+                estado: 'completada'
+            },
+            {
+                id: '109284',
+                fecha: new Date(Date.now() - 86400000).toISOString(), // Ayer
+                tipo: 'conversión',
+                montoEntrada: 50.00,
+                monedaEntrada: 'USD',
+                montoSalida: 40.37,
+                monedaSalida: 'EUR',
+                estado: 'completada'
+            }
+        ];
 
-    if (!token && !publicPages.includes(currentPage)) {
-        window.location.href = '/login.html';
-        return false;
+        res.json(transactions);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al obtener el historial de transacciones.' });
     }
-    
-    return true;
-}
+});
 
-// Verificar auth al cargar (opcional, descomentar si se necesita protección de rutas)
-// verificarAutenticacion();
-
-// Exportar funciones útiles para uso global si es necesario
-window.NexusFinance = {
-    obtenerToken,
-    cerrarSesion,
-    formatearMoneda,
-    cargarHistorialTransacciones
-};
+// ==========================================
+// INICIAR SERVIDOR
+// ==========================================
+app.listen(PORT, () => {
+    console.log(`Servidor de Nexus Finance ejecutándose en http://localhost:${PORT}`);
+});
