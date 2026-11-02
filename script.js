@@ -1,268 +1,124 @@
+const express = require('express');
+const cors = require('cors');
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const app = express();
 
-// Utilidades
-const $ = (id) => document.getElementById(id);
-const formatCurrency = (amount, currency = 'USD') => 
-    new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+// Middlewares
+app.use(express.json());
+app.use(cors());
 
-// Auth
-function getToken() { return localStorage.getItem('token'); }
-function logout() {
-    localStorage.clear();
-    window.location.href = 'login.html';
-}
+const PORT = process.env.PORT || 3000;
 
-// Verificar auth
-if (!getToken() && !window.location.pathname.includes('login')) {
-    window.location.href = 'login.html';
-}
+// ==========================================
+// 1. ENDPOINT DE ESTADO (Health Check)
+// ==========================================
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'OK', message: 'Backend de Nexus Finance funcionando correctamente 🚀' });
+});
 
-// Theme Toggle
-const themeToggle = $('theme-toggle');
-if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-        const html = document.documentElement;
-        const current = html.getAttribute('data-theme');
-        const next = current === 'dark' ? 'light' : 'dark';
-        html.setAttribute('data-theme', next);
-        themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+// ==========================================
+// 2. ENDPOINT DE PERFIL DE USUARIO
+// ==========================================
+app.get('/api/user/profile', (req, res) => {
+    // Aquí validarías el token del header 'Authorization: Bearer <token>'
+    // Datos simulados de ejemplo para que coincidan con la UI
+    res.json({
+        nombre: 'Emanuel',
+        balance: 1540.50
     });
-}
+});
 
-// Cargar datos usuario
-async function loadUserData() {
-    if (!getToken()) return;
-    
+// ==========================================
+// 3. ENDPOINT DE CONVERSIÓN DE DIVISAS
+// ==========================================
+// Coincide con: `${API_BASE_URL}/convert?from=${from}&to=${to}&amount=${amount}`
+app.get('/api/convert', (req, res) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/user/profile`, {
-            headers: { 'Authorization': `Bearer ${getToken()}` }
-        });
-        
-        if (!response.ok) throw new Error('Error cargando usuario');
-        
-        const data = await response.json();
-        localStorage.setItem('user', JSON.stringify(data));
-        
-        // Actualizar UI
-        const userName = $('user-name');
-        const userBalance = $('user-balance');
-        
-        if (userName) userName.textContent = data.nombre || 'Usuario';
-        if (userBalance) userBalance.textContent = formatCurrency(data.balance || 0);
-        
-    } catch (err) {
-        console.error('Error:', err);
-    }
-}
+        const { from, to, amount } = req.query;
+        const parsedAmount = parseFloat(amount);
 
-// Conversor
-let currentConversion = null;
-
-async function performConversion() {
-    const amount = parseFloat($('amount').value);
-    const from = $('from').value;
-    const to = $('to').value;
-    
-    if (!amount || amount <= 0) {
-        alert('Ingresa un monto válido');
-        return;
-    }
-    
-    if (from === to) {
-        alert('Selecciona monedas diferentes');
-        return;
-    }
-    
-    const btn = $('btn-convert');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calculando...';
-    btn.disabled = true;
-    
-    try {
-        const response = await fetch(
-            `${API_BASE_URL}/convert?from=${from}&to=${to}&amount=${amount}`,
-            { headers: { 'Authorization': `Bearer ${getToken()}` } }
-        );
-        
-        const data = await response.json();
-        
-        if (!response.ok) throw new Error(data.error);
-        
-        // Mostrar resultado
-        $('result-amount').value = data.netResult;
-        $('applied-rate').textContent = `1 ${from} = ${data.rate} ${to}`;
-        $('commission').textContent = `$${data.commission} ${to}`;
-        
-        // Actualizar nombres
-        updateCurrencyNames();
-        
-        currentConversion = { from, to, amount, ...data };
-        
-    } catch (err) {
-        alert(err.message);
-    } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
-}
-
-function updateCurrencyNames() {
-    const fromName = $('from').options[$('from').selectedIndex].text.split(' ')[1];
-    const toName = $('to').options[$('to').selectedIndex].text.split(' ')[1];
-    
-    document.querySelector('.currency-box.from .currency-name').textContent = fromName;
-    document.querySelector('.currency-box.to .currency-name').textContent = toName;
-}
-
-// Event listeners conversor
-if ($('btn-convert')) {
-    $('btn-convert').addEventListener('click', performConversion);
-}
-
-if ($('swap-currencies')) {
-    $('swap-currencies').addEventListener('click', () => {
-        const from = $('from');
-        const to = $('to');
-        const temp = from.value;
-        from.value = to.value;
-        to.value = temp;
-        updateCurrencyNames();
-        
-        // Animación
-        $('swap-currencies').style.transform = 'rotate(180deg)';
-        setTimeout(() => $('swap-currencies').style.transform = '', 300);
-    });
-}
-
-if ($('from')) {
-    $('from').addEventListener('change', updateCurrencyNames);
-    $('to').addEventListener('change', updateCurrencyNames);
-}
-
-// Pagos
-function initPayments() {
-    const stripeCard = document.querySelector('[data-provider="stripe"]');
-    const paypalCard = document.querySelector('[data-provider="paypal"]');
-    
-    if (stripeCard) {
-        stripeCard.addEventListener('click', () => openDepositModal('stripe'));
-    }
-    
-    if (paypalCard) {
-        paypalCard.addEventListener('click', () => openDepositModal('paypal'));
-    }
-}
-
-function openDepositModal(provider) {
-    const modal = $('deposit-modal');
-    const confirmBtn = $('confirm-deposit');
-    
-    modal.classList.add('active');
-    
-    // Presets
-    document.querySelectorAll('.preset-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            $('custom-amount').value = btn.dataset.amount;
-        });
-    });
-    
-    confirmBtn.onclick = async () => {
-        const amount = $('custom-amount').value;
-        if (!amount || amount <= 0) {
-            alert('Ingresa un monto válido');
-            return;
+        if (!parsedAmount || parsedAmount <= 0) {
+            return res.status(400).json({ error: 'Ingresa un monto válido para la conversión.' });
         }
-        
-        if (provider === 'stripe') {
-            await processStripe(amount);
-        } else {
-            await processPayPal(amount);
-        }
-        
-        modal.classList.remove('active');
-    };
-    
-    // Cerrar modal
-    document.querySelector('.modal-close').onclick = () => {
-        modal.classList.remove('active');
-    };
-    
-    modal.onclick = (e) => {
-        if (e.target === modal) modal.classList.remove('active');
-    };
-}
 
-async function processStripe(amount) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/checkout/stripe`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getToken()}`
-            },
-            body: JSON.stringify({
-                montoTotal: parseFloat(amount),
-                titulo: 'Recarga Nexus Finance'
-            })
+        // Tasa de cambio simulada (ejemplo: 1 USD = 0.85 EUR)
+        const rate = 0.85; 
+        const feePercentage = 0.05; // 5% de comisión
+
+        const commission = parsedAmount * feePercentage;
+        const netAmountAfterFee = parsedAmount - commission;
+        const netResult = netAmountAfterFee * rate;
+
+        res.json({
+            rate: rate,
+            commission: commission.toFixed(2),
+            netResult: netResult.toFixed(2)
         });
-        
-        const data = await response.json();
-        if (data.url) window.location.href = data.url;
-        
+
     } catch (err) {
-        alert('Error con Stripe: ' + err.message);
+        res.status(500).json({ error: 'Error interno en el servidor al convertir.' });
     }
-}
+});
 
-async function processPayPal(amount) {
+// ==========================================
+// 4. ENDPOINTS DE PAGO / RECARGAS (Stripe & PayPal)
+// ==========================================
+app.post('/api/checkout/stripe', (req, res) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/checkout/paypal`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getToken()}`
-            },
-            body: JSON.stringify({
-                montoTotal: parseFloat(amount),
-                descripcion: 'Recarga Nexus Finance'
-            })
+        const { montoTotal, titulo } = req.body;
+        
+        // Aquí integrarías el SDK real de Stripe para generar la sesión de pago
+        // Simulamos una URL de redirección de Stripe
+        res.json({
+            success: true,
+            url: 'https://checkout.stripe.com/pay/mock_session_id'
         });
-        
-        const data = await response.json();
-        if (data.approvalUrl) window.location.href = data.approvalUrl;
-        
     } catch (err) {
-        alert('Error con PayPal: ' + err.message);
+        res.status(500).json({ error: 'Error al procesar pago con Stripe' });
     }
-}
+});
 
-// Historial
-async function loadTransactions() {
-    if (!getToken()) return;
-    
-    const container = $('transactions-list');
-    if (!container) return;
-    
-    container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>';
-    
+app.post('/api/checkout/paypal', (req, res) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/transactions`, {
-            headers: { 'Authorization': `Bearer ${getToken()}` }
+        const { montoTotal, descripcion } = req.body;
+        
+        // Aquí integrarías la API de PayPal para crear la orden
+        // Simulamos una URL de aprobación de PayPal
+        res.json({
+            success: true,
+            approvalUrl: 'https://www.sandbox.paypal.com/checkoutnow?token=mock_token'
         });
-        
-        const data = await response.json();
-        
-        if (!data || data.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-inbox"></i>
-                    <p>No hay transacciones recientes</p>
-                </div>
-            `;
-            return;
-        }
-        
-        // Actualizar contador
+    } catch (err) {
+        res.status(500).json({ error: 'Error al procesar pago con PayPal' });
+    }
+});
+
+// ==========================================
+// 5. ENDPOINT DE HISTORIAL DE TRANSACCIONES
+// ==========================================
+app.get('/api/transactions', (req, res) => {
+    try {
+        // Puedes retornar un array vacío [] como tu script ya lo maneja cuando no hay transacciones,
+        // o devolver datos de prueba simulados:
+        const transactions = [
+            {
+                id: 1,
+                tipo: 'Recarga',
+                detalle: 'Recarga vía Stripe',
+                monto: '+$100.00 USD',
+                fecha: '2026-10-26'
+            }
+        ];
+
+        res.json(transactions);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al obtener transacciones' });
+    }
+});
+
+// ==========================================
+// INICIAR SERVIDOR
+// ==========================================
+app.listen(PORT, () => {
+    console.log(`Servidor de Nexus Finance corriendo en http://localhost:${PORT}`);
+});
